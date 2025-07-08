@@ -57,6 +57,7 @@ void Camera::updateProjection(int width, int height)
     } else {
         projection.perspective(45.0f, screenRation, 0.01f, 30000.0f);
     }
+    updateView();
 }
 
 
@@ -136,9 +137,11 @@ void Camera::zoomToCursor(short forward, QVector3D target)
 
 void Camera::updateView()
 {
-    view.setToIdentity();
-    view.translate(translation);
-    view.rotate(rotation);
-    view.translate(0, 0, orbitDistance);
-    //TODO view matrix is inverted?
+    transform.setToIdentity();
+    transform.translate(translation);
+    transform.rotate(rotation);
+    transform.translate(0, 0, orbitDistance);
+
+    view = transform.inverted();
+    viewProjection = projection * view;
 }

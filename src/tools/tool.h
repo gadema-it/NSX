@@ -7,6 +7,8 @@
 #include <QOpenGLFunctions>
 #include <QOpenGLWidget>
 
+class Camera;
+
 class Tool: public QObject
 {
     Q_OBJECT
@@ -17,6 +19,9 @@ public:
     //virtual void draw(QOpenGLFunctions *f);
     virtual void draw(QOpenGLFunctions *f, QVector3D cameraPosition, QMatrix4x4& viewProjection);
     virtual void drawSelection(QOpenGLFunctions *f, QVector3D cameraPosition, QMatrix4x4& viewProjection);
+
+    virtual void draw(QOpenGLFunctions *f, Camera &camera) {}
+    virtual void drawSelection(QOpenGLFunctions *f, Camera &camera) {}
 
     virtual void initialize(); // per non caricare tutti i tool subito, controlla se inizializzato quando preso dalla lista?
     //virtual void terminate();

@@ -14,7 +14,7 @@
 struct HalfEdge;
 
 struct Header {
-    int id;
+    uint id;
     bool selected; // TODO bit flags
     bool visited;
     //int mask
@@ -223,8 +223,8 @@ public:
     int splitEdge(int index, float ratio);
     int splitFace(int vertex_A, int vertex_B);
     void addEdge(int index_v1, int index_v2);
-    void addFace(std::vector<int> vertex_indices);
-    int addFace(std::vector<QVector3D> vertex_positions);
+    int addFace(std::vector<int> vertex_indices);
+    int addVertexAndFace(std::vector<QVector3D> vertex_positions);
     void addFaceVertex(QVector3D position);
     void deleteFace(std::vector<int> vertex_indices);
 
@@ -242,7 +242,7 @@ public:
     std::vector<Vertex> subdivision_vertices;
 
   //  std::vector<SubdivisionFace> subdivision_faces;
-    std::vector<unsigned short> subdivision_triangle_indices;
+    std::vector<unsigned int> subdivision_triangle_indices;
 
     void createSubdivision();
     void updateSubdivision();

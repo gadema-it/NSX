@@ -45,13 +45,13 @@ void EdgeTool::deactivate()
     mesh = nullptr;
 }
 
-void EdgeTool::draw(QOpenGLFunctions *f, QVector3D cameraPosition, QMatrix4x4 &viewProjection)
+void EdgeTool::draw(QOpenGLFunctions *f, Camera &camera)
 {
     if(edge_id != -1 || vertex_id != -1 || state == State::START_CUT) {
         glDisable(GL_DEPTH_TEST);
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
-        glMultMatrixf(viewProjection.data());
+        glMultMatrixf(camera.viewProjection.data());
         glPointSize(6.0);
 
         //if (state == NONE) {
@@ -178,7 +178,7 @@ void EdgeTool::mouseMoveEvent(QMouseEvent *event)
 
          edgePoint = intersectTriangle(
                      viewport->unprojectClick(event->pos()),
-                     viewport->camera.view.column(3).toVector3D(),
+                     viewport->camera.transform.column(3).toVector3D(),
                      mesh,
                      ids[0]
                      );
@@ -228,7 +228,7 @@ void EdgeTool::mouseMoveEvent(QMouseEvent *event)
              float line_lenght = line_direction.length();
              line_direction.normalize();
           //   qDebug() << line_lenght;
-             QVector3D q = viewport->camera.view.column(3).toVector3D() - edgePoint;
+             QVector3D q = viewport->camera.transform.column(3).toVector3D() - edgePoint;
 
              double bDotB = QVector3D::dotProduct(line_direction, line_direction);
              double bDotD = QVector3D::dotProduct(line_direction, click_line);
@@ -270,7 +270,7 @@ void EdgeTool::mouseMoveEvent(QMouseEvent *event)
 
             if (state == START_CUT) {
                 Viewport *viewport = Viewport::getActiveViewport();
-                QVector3D ray_origin = viewport->camera.view.column(3).toVector3D();
+                QVector3D ray_origin = viewport->camera.transform.column(3).toVector3D();
                 QVector3D ray_direction = viewport->unprojectClick(event->pos());
                 end_point =  ray_origin - ray_direction * 10;
             }
@@ -281,7 +281,7 @@ void EdgeTool::wheelEvent(QWheelEvent *event)
 {
     if (state == START_CUT) {
         Viewport *viewport = Viewport::getActiveViewport();
-        QVector3D ray_origin = viewport->camera.view.column(3).toVector3D();
+        QVector3D ray_origin = viewport->camera.transform.column(3).toVector3D();
         QVector3D ray_direction = viewport->unprojectClick(event->pos());
         end_point =  ray_origin - ray_direction * 10;
     }

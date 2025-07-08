@@ -33,7 +33,7 @@ static void test_loop_star(HalfEdge *he, bool inverse) {
         qDebug() << "vertex" << test_A->vertex->header.id;     
 
         if (guard > 30) {
-            qDebug() << "star loop";
+            qDebug() << "face loop";
             Q_ASSERT(false);
         }
 
@@ -54,12 +54,12 @@ static void test_loop_star(HalfEdge *he, bool inverse) {
             qDebug() << "face" << test_A->face->header.id;
         }
 
+        qDebug() << "vertex" << test_A->vertex->header.id;
+
         if (guard > 30) {
             qDebug() << "star loop";
             Q_ASSERT(false);
         }
-
-        qDebug() << "vertex" << test_A->vertex->header.id;
 
         if (inverse) {
             test_A = test_A->star_prev;
@@ -73,14 +73,24 @@ static void test_loop_star(HalfEdge *he, bool inverse) {
 
 
 Geometry::Geometry():
-    vertex_pool(256),
-    face_pool(256),
-    half_edge_pool(256)
+    vertex_pool(100),
+    face_pool(100),
+    half_edge_pool(200)
 {
 }
 
 
-// FIXME no vertici senza faccia
+int Geometry::addFace(std::vector<int> vertex_indices)
+{
+
+
+
+    return 0;
+}
+
+
+// no double edges
+// no vertex checks
 void Geometry::fromVertexFaceArray(const std::vector<Vertex> &vertices_data, const std::vector<std::vector<int>> &faces_indices)
 {
 
@@ -98,16 +108,16 @@ void Geometry::fromVertexFaceArray(const std::vector<Vertex> &vertices_data, con
         allocated_face->vertex_count = face_indices.size();
         faces.push_back(allocated_face);
         HalfEdge *previous_he = nullptr;
-        for(uint i = 0, j = 1; i < face_indices.size(); i++) {     //loop from edge Vn --- V0  | V0 --- V1 ...
+        for(uint i = 0, j = 1; i < face_indices.size(); i++) { //loop from edge Vn --- V0  | V0 --- V1 ...
             Vertex *v1 = vertices[face_indices[i]];
             Vertex *v2 = vertices[face_indices[j]];
             HalfEdge *current_he = nullptr;
 
-            if (v1->half_edge != nullptr) { // check v1 edge star
+            if (v1->half_edge != nullptr) { // find free half edge from v1 to v2, in v1 half edge star
                 HalfEdge *start_star_halfedge = v1->half_edge;
                 HalfEdge *current_star_halfedge = start_star_halfedge;
                 do {
-                    if (current_star_halfedge->twin->vertex == v2) {
+                    if (current_star_halfedge->twin->vertex == v2 && current_star_halfedge->face == nullptr) { //TODO check double edges
                         current_he = current_star_halfedge;
                         break;
                     }
@@ -115,7 +125,7 @@ void Geometry::fromVertexFaceArray(const std::vector<Vertex> &vertices_data, con
                 } while (current_star_halfedge != start_star_halfedge);
             }
 
-            if (current_he == nullptr) {    // non esiste edge tra v1 e v2
+            if (current_he == nullptr) { //no free he v1 -> v2
                 HalfEdge *he_start = half_edge_pool.allocate();     // counter clockwise
                 he_start->header.id = half_edges.size();
                 half_edges.push_back(he_start);
@@ -398,6 +408,9 @@ void Geometry::triangulate()
                  //   qDebug() << "concave_points size " << concave_points.size();
 
                    if (concave_points.empty()) {
+
+                        // polygon is convex, fan triangulate
+
                         start = face->half_edge;
                         it = face->half_edge->loop_next;
                         while (start != it->loop_next) {
@@ -408,6 +421,7 @@ void Geometry::triangulate()
                             triangle_to_polygon.push_back(face->header.id);
                             triangle_count++;
                         }
+
                         continue;
                     }
 
@@ -488,6 +502,7 @@ void Geometry::updateFaceNormals()
                 face->normal.setZ(face->normal.z() + (v1->x() - v2->x()) * (v1->y() + v2->y()));
             } while (start != it);
             face->normal.normalize();
+           // qDebug() << face->header.id;
     }
 }
 
@@ -509,7 +524,7 @@ void Geometry::updateHalfEdgeNormals()
         do  { // reset flag // TODO global counter
             it->header.visited = false;
             it = it->star_next;
-           //  qDebug() << it->header.id;
+            // qDebug() << it->header.id;
         } while (start != it);
 
       //  qDebug() << "trasssss";
@@ -577,13 +592,8 @@ void Geometry::updateHalfEdgeNormals()
 
 
 // UNDO save half_edge_v1_v2, half_edge_v2_v1; reconnect half_edge_v1_v2->next, half_edge_v2_v1->prev
-// FIXME se si fa cosi non sono piu consecutivi
-//    <-new--     <----
-// v1 ------ new v3 -------> v2
-//    ---->     --new->
 
-
-int Geometry::splitEdge(int index, float ratio)
+int Geometry::splitEdge(int index, float ratio) //TODO index of edge
 {
     HalfEdge *half_edge_v1_v2 = half_edges[index];
     HalfEdge *half_edge_v2_v1 = half_edge_v1_v2->twin;
@@ -609,7 +619,7 @@ int Geometry::splitEdge(int index, float ratio)
     new_he_v3_v2->face = half_edge_v1_v2->face;
     if (new_he_v3_v2->face != nullptr) {
          ++new_he_v3_v2->face->vertex_count;
-        new_he_v3_v2->uv = (1 - ratio) * half_edge_v1_v2->uv +  ratio*  half_edge_v1_v2->loop_next->uv;
+        new_he_v3_v2->uv = (1 - ratio) * half_edge_v1_v2->uv +  ratio *  half_edge_v1_v2->loop_next->uv;
     }
 
 // insert new after v1_v2 and before v1_v2->loop_next
@@ -665,10 +675,10 @@ int Geometry::splitEdge(int index, float ratio)
     half_edge_v2_v1->star_prev = new_he_v3_v2;
 
 
-    test_loop_star(new_he_v3_v2, true);
-    test_loop_star(new_he_v2_v3, true);
+    test_loop_star(new_he_v3_v2, false);
+    test_loop_star(new_he_v2_v3, false);
 
-    return v3->header.id;
+    return v3->header.id; // TODO return new edge id
 }
 
 
@@ -731,11 +741,16 @@ same_face:
     new_he_a_b->twin = new_he_b_a;
     new_he_b_a->twin = new_he_a_b;
 
+    //copy he attributes
+    new_he_a_b->uv = half_edge_A->uv;
+    new_he_b_a->uv = half_edge_B->uv;
+
     //fix loop A
     half_edge_A->loop_prev->loop_next = new_he_a_b;
     new_he_a_b->loop_prev = half_edge_A->loop_prev;
     half_edge_A->loop_prev = new_he_b_a;
     new_he_b_a->loop_next = half_edge_A;
+
 
     //fix star A
     half_edge_A->star_next->star_prev = new_he_a_b;
@@ -784,12 +799,9 @@ void Geometry::addEdge(int index_v1, int index_v2)
 }
 
 
-void Geometry::addFace(std::vector<int> vertex_indices)
-{
 
-}
 
-int Geometry::addFace(std::vector<QVector3D> vertex_positions)
+int Geometry::addVertexAndFace(std::vector<QVector3D> vertex_positions)
 {
     Face *allocated_face = face_pool.allocate();
     allocated_face->header.id = faces.size();
@@ -876,7 +888,7 @@ void Geometry::deleteFace(std::vector<int> vertex_indices)
     std::vector<Face*> removed_faces;
     std::vector<Vertex*> removed_vertices;
     std::vector<HalfEdge*> removed_halfedges;
-    std::vector<HalfEdge*> face_halfedge;
+    std::vector<HalfEdge*> face_halfedge; // internal he of the removed faces
 
     int face_max_index = faces.size() - 1;
     for (int index: vertex_indices) {
@@ -932,23 +944,38 @@ void Geometry::deleteFace(std::vector<int> vertex_indices)
             }
 
             // controlla vertex
-            if (it->star_prev == it->star_next) { // vertex ha solo 2 edge
+            if (it->star_prev == it->star_next) {
+
+                // rimuovi anche vertex, ha solo 2 edge
+
                 int vertex_index = it->vertex->header.id;
                 removed_vertices.push_back(vertices[vertex_index]);
                 vertices[vertex_index] = vertices.back();
                 vertices[vertex_index]->header.id = vertex_index;
-                vertices.pop_back();
-            } else { // rimuovi edge da star
+                vertices.pop_back();          
+            } else { // rimuovi halfedge da star
                 it->star_next->star_prev = it->star_prev;
                 it->star_prev->star_next = it->star_next;
-                it->vertex->half_edge =  it->star_next;
-                  qDebug() << "star delete" << it->vertex->header.id;
+                qDebug() << "star delete" << it->vertex->header.id;
+
+                HalfEdge *prev_twin = it->loop_prev->twin;
+                if (prev_twin->face == nullptr) {
+                    prev_twin->star_next->star_prev = prev_twin->star_prev;
+                    prev_twin->star_prev->star_next = prev_twin->star_next;
+                    qDebug() << "star delete" << prev_twin->vertex->header.id;
+                }
+
+                it->vertex->half_edge = prev_twin->star_next;
+                qDebug() << " it->vertex->half_edge --------------" << prev_twin->star_next->header.id;
+
             }
 
             // face loop
             HalfEdge *prev = it->loop_prev;
             if (prev->twin->face != nullptr) {
+
                 // l'edge prev rimane, diventa confine
+
                 prev->face = nullptr;
                 it->twin->loop_next->loop_prev = prev;
                 prev->loop_next = it->twin->loop_next;
@@ -962,19 +989,19 @@ void Geometry::deleteFace(std::vector<int> vertex_indices)
 
             HalfEdge *disk_prev = it->twin->loop_next->twin;
             HalfEdge *disk_prev_it = disk_prev;
-
-            // !! da fare solo quando it->loop_prev->twin->face == nullptr
             do {
+
+                // disk loop
+
                 if (disk_prev_it->face == nullptr) {
 
-                    if(it->loop_prev->twin->face != nullptr) {
-                        // rimane anche l'altro edge
+                    if (it->loop_prev->twin->face != nullptr) { // se rimane anche l'altro edge
 
-                        if(it->loop_prev != disk_prev_it) {
+                        if (it->loop_prev != disk_prev_it) {
                             // nm vertex
-                              qDebug() << " nm vertex  nm vertex  nm vertex";
+                            qDebug() << " nm vertex  nm vertex  nm vertex";
                             it->loop_prev->loop_next = disk_prev_it->loop_next;
-                            disk_prev_it->loop_next->loop_prev = it->loop_prev->loop_next;
+                            disk_prev_it->loop_next->loop_prev = it->loop_prev;
                         }
 
                     } else {
@@ -1008,20 +1035,21 @@ void Geometry::deleteFace(std::vector<int> vertex_indices)
         }
     }
 
-//qDebug() << "wtf " << vertices[6]->half_edge->header.id;
-//qDebug() << "wtf " << vertices[6]->half_edge->loop_next->header.id;
-//qDebug() << "wtf " << vertices[6]->half_edge->loop_next->loop_next->header.id;
-
 
     for(HalfEdge *it: face_halfedge) {
+        //std::vector<HalfEdge*>::iterator deleted_it = find (removed_halfedges.begin(), removed_halfedges.end(), it);
+        //if (deleted_it != removed_halfedges.end()) {
         if (it->twin->face != nullptr) {
+            test_loop_star(it, false);
+            test_loop_star(it, true);
             test_loop_star(it->twin, false);
             test_loop_star(it->twin, true);
         }
+
     }
 
 
-
+    qDebug() << "end delete";
 
 }
 

@@ -5,7 +5,7 @@
 #include <QVector3D>
 
 class Mesh;
-
+class Camera;
 
 
 
@@ -43,7 +43,7 @@ public:
     float ratio;
 
 
-    void draw(QOpenGLFunctions *f, QVector3D cameraPosition, QMatrix4x4 &viewProjection) override;
+    void draw(QOpenGLFunctions *f, Camera &camera) override;
     void mousePressEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;

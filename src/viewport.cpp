@@ -69,6 +69,7 @@ void Viewport::initializeGL()
 
    glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 
+
    //selection shader per le componenti
    //TODO refactor - move to helper?
    selectShader = new QOpenGLShaderProgram(this); //TODO in Application or selection tool
@@ -181,7 +182,6 @@ void Viewport::paintGL()
     auto start = std::chrono::high_resolution_clock::now();
 
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    QMatrix4x4 viewProjection = camera.projection * camera.view.inverted(); //TODO default camera per viewport e metodo: this->getCamera()->getViewProjectionMatrix();
     std::vector<Object3D*>* sceneObjects = scene.getObjectList();
 
 //Flags
@@ -194,7 +194,7 @@ void Viewport::paintGL()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
     if (active_tool != nullptr) {
-        active_tool->drawSelection(f, camera.view.column(3).toVector3D(), viewProjection);
+        active_tool->drawSelection(f, camera);
     }
     glDisable(GL_DEPTH_TEST);
     tool_selectBuffer->bindDefault(); //restore default framebuffer
@@ -202,12 +202,13 @@ void Viewport::paintGL()
 
 //Drawing scene
     glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+   //    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 
 
 //draw grid
-    grid.draw(f, &viewProjection);
+    grid.draw(f, &camera.viewProjection);
 
 
 //draw objects
@@ -218,7 +219,7 @@ void Viewport::paintGL()
     glEnable(GL_POLYGON_OFFSET_FILL); //avoid zfight polygon-edge
     glPolygonOffset(0.6, 1); //TODO distance based
     for (const auto& sceneObject : *sceneObjects) {
-        sceneObject->draw(f, &viewProjection, this);
+        sceneObject->draw(f, &camera.viewProjection, this);
     }
   //  glShadeModel(GL_SMOOTH);
    // glDisable(GL_CULL_FACE);
@@ -228,7 +229,8 @@ void Viewport::paintGL()
 //draw tool
     glClear(GL_DEPTH_BUFFER_BIT); //disegna tool sopra a tutto il resto
     if (active_tool != nullptr) {
-        active_tool->draw(f, camera.view.column(3).toVector3D(), viewProjection);
+        active_tool->draw(f, camera);
+
     }
 
 
@@ -238,6 +240,53 @@ void Viewport::paintGL()
     glViewport(0, 0, width, height);
 
     glDisable(GL_DEPTH_TEST);
+
+
+
+
+//    glMatrixMode(GL_MODELVIEW);
+//    glPushMatrix();
+
+    //glMultMatrixf(camera.viewProjection.data());
+
+//    QMatrix4x4 m;
+//    m.setToIdentity();
+//    m.rotate(90, QVector3D(1, 0, 0));
+//   // glMultMatrixf(m.data());
+
+//    glMultMatrixf((camera.viewProjection * m).data());
+
+//    glBegin(GL_TRIANGLE_STRIP);
+//    glColor3f(0.0, 1.0, 0.0);
+
+//    float interval = 3.14159265359 / 24;
+//    float angle = 0.0f;
+//    for(int i = 0; i < 49; i++) {
+//        float x = sin(angle) * 1.5;
+//        float y = cos(angle) * 1.5;
+//        glVertex3f(x, y, interval/2);
+//        glVertex3f(x, y, -interval/2);
+//        angle += interval;
+//    }
+
+//    glEnd();
+
+
+//    glBegin(GL_POINTS);
+//    glColor3f(1.0, 0.0, 0.0);
+//    float x = sin(interval/2) * 1.5;
+//    float y = cos(interval/2) * 1.5;
+//    glVertex3f(x, y, interval/2);
+//    x = sin(-interval/2) * 1.5;
+//    y = cos(-interval/2) * 1.5;
+//    glVertex3f(x, y, -interval/2);
+//    glEnd();
+
+//    glPopMatrix();
+
+
+
+
 
 
 //TESTS
@@ -434,7 +483,7 @@ void Viewport::keyPressEvent(QKeyEvent *event)
                edit_mode_object->geometry_dirty = true;
          //  }
        } else if (event->key() == Qt::Key::Key_Right) {
-
+             qDebug() << "print star";
              if (edit_mode_object == nullptr || edit_mode_object->selection_type != VERTEX) {
                   return;
              }
@@ -443,12 +492,12 @@ void Viewport::keyPressEvent(QKeyEvent *event)
              HalfEdge* start = v->half_edge;
              HalfEdge* it = v->half_edge;
              do  {
-                  qDebug() << it->header.id/2;
+                  qDebug() << "v" << it->vertex->header.id << "e" << it->header.id/2;
                   it = it->star_next;
              } while (start != it);
 
        } else if (event->key() == Qt::Key::Key_Up) {
-
+           qDebug() << "print loop";
            if (edit_mode_object == nullptr || edit_mode_object->selection_type != VERTEX) {
                 return;
            }
@@ -457,7 +506,7 @@ void Viewport::keyPressEvent(QKeyEvent *event)
            HalfEdge* start = v->half_edge;
            HalfEdge* it = v->half_edge;
            do  {
-                qDebug() << it->header.id/2;
+                qDebug() << "v" << it->vertex->header.id << "e" << it->header.id/2;
                 it = it->loop_next;
            } while (start != it);
 
@@ -535,10 +584,10 @@ void Viewport::wheelEvent(QWheelEvent *event)
 // default event zoom to cursor
     Camera* camera = &Viewport::getActiveViewport()->camera;
     QVector3D screen_point = QVector3D(event->position().rx(), height - event->position().ry() , 0.0f);
-    QVector3D camera_ray_start = screen_point.unproject(camera->view.inverted(), camera->projection, QRect(0, 0, width, height)); //camera near plane projection
+    QVector3D camera_ray_start = screen_point.unproject(camera->view, camera->projection, QRect(0, 0, width, height)); //camera near plane projection
 
-    QVector3D camera_ray = (camera->view.column(3).toVector3D() - camera_ray_start).normalized();
-    QVector3D cameraPlaneNormal = (camera->view.column(3).toVector3D() - camera->translation).normalized();
+    QVector3D camera_ray = (camera->transform.column(3).toVector3D() - camera_ray_start).normalized();
+    QVector3D cameraPlaneNormal = (camera->transform.column(3).toVector3D() - camera->translation).normalized();
 
     float distance = QVector3D::dotProduct(cameraPlaneNormal, (camera->translation - camera_ray_start)) / QVector3D::dotProduct(camera_ray, cameraPlaneNormal);
 
@@ -601,15 +650,15 @@ QVector3D Viewport::getMouseWorldPosition()
     //GLint view[4];
     //glGetIntegerv(GL_VIEWPORT, &view[0]);
     //return point.unproject(camera.view.inverted(), camera.projection, QRect(view[0], view[1], view[2], view[3]));
-    return point.unproject(camera.view.inverted(), camera.projection, QRect(0, 0, width, height));
+    return point.unproject(camera.view, camera.projection, QRect(0, 0, width, height));
 }
 
 QVector3D Viewport::unprojectClick(QPoint click_point)
 {
     QVector3D point = QVector3D(click_point.rx(), height - click_point.ry() , 0.0f);
     //makeCurrent();
-    point = point.unproject(camera.view.inverted(), camera.projection, QRect(0, 0, width, height));
-    QVector3D cameraPosition =  camera.view.column(3).toVector3D();
+    point = point.unproject(camera.view, camera.projection, QRect(0, 0, width, height));
+    QVector3D cameraPosition =  camera.transform.column(3).toVector3D();
     return (cameraPosition - point).normalized();
 }
 
@@ -620,8 +669,7 @@ QVector3D Viewport::unprojectClick(QPoint click_point)
 //TODO cache se view non cambia
 void Viewport::drawSelectionBuffer(Mesh* object, SelectionType selection_type)
 {
-    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    QMatrix4x4 viewProjection = camera.projection * camera.view.inverted(); //TODO default camera per viewport e metodo: this->getCamera()->getViewProjectionMatrix();
+    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions(); //TODO default camera per viewport e metodo: this->getCamera()->getViewProjectionMatrix();
     makeCurrent();
     selectBuffer->bind(); //glBindFramebuffer write?
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -630,16 +678,12 @@ void Viewport::drawSelectionBuffer(Mesh* object, SelectionType selection_type)
     glEnable(GL_PROGRAM_POINT_SIZE);
     glEnable(GL_CULL_FACE);
 
-    if (object == nullptr && edit_mode_object != nullptr) {
-        object = edit_mode_object;
-    }
-
     if (object != nullptr) {
-         object->drawSelection(f, &viewProjection, selection_type, 0);
+         object->drawSelection(f, &camera.viewProjection, selection_type, 0);
     } else {
         std::vector<Object3D*> *sceneObjects = scene.getObjectList();
         for(int i = 0; i < sceneObjects->size(); i++) {
-            sceneObjects->at(i)->drawSelection(f, &viewProjection, OBJECT, i);
+            sceneObjects->at(i)->drawSelection(f, &camera.viewProjection, OBJECT, i);
         }
     }
 
@@ -724,29 +768,48 @@ std::vector<int> Viewport::getPickBufferIDs(SelectionType selection_type, bool s
     //qDebug() << "ogl top_left" << top_left << "ogl bottom_right" << bottom_right;
     //qDebug() << "rectangle_height" << rectangle_height << "rectangle_width" << rectangle_width;
 
+    if (object3D == nullptr && edit_mode_object != nullptr) {
+        object3D = edit_mode_object;
+    }
+
     makeCurrent();
     drawSelectionBuffer(object3D, selection_type);  //TODO draw xy
 
-
-    unsigned char *data = new unsigned char[rectangle_height * rectangle_width * 4](); // TODO fisso per mouse move
+    //unsigned char *data = new unsigned char[rectangle_height * rectangle_width * 4](); // TODO fisso per mouse move
+    float *data = new float[rectangle_height * rectangle_width * 4]();
     glBindFramebuffer(GL_READ_FRAMEBUFFER, selectBuffer->handle());
-    glReadPixels(top_left.x(), bottom_right.y(), rectangle_width, rectangle_height, GL_RGBA, GL_UNSIGNED_BYTE , data); //left corner is at location (x, y)
+    glReadPixels(top_left.x(), bottom_right.y(), rectangle_width, rectangle_height, GL_RGBA, GL_FLOAT , data); //left corner is at location (x, y)
 
     int rectangles_bytes = rectangle_height * rectangle_width * 4;
     std::vector<int> ids;
     if (single_selection) {
+
         // TODO spiral loop
         for(int i = 0; i < rectangles_bytes; i += 4) {
-            int id = data[i] + data[i+1]*256 + data[i+2]*256*256;
+            int id = data[i]*255 + data[i+1]*255*256 + data[i+2]*255*256*256;
             if (id != MAX_SELECTION_ID) {
                 ids.push_back(id);
                 break;
             }
         }
+
     } else {
-        bool *visited = new bool[1000]();  // dipende da selection type, TODO vertex + edge + face counts
+
+        int element_count;
+        if(selection_type & OBJECT) {
+            element_count = scene.objectList.size();
+        } else if (selection_type & VERTEX) {
+             element_count = object3D->geometry->vertices.size();
+        } else if (selection_type & POLYGON) {
+            element_count = object3D->geometry->triangle_to_polygon.size();
+        } else {
+            element_count = object3D->geometry->half_edges.size() / 2;
+        }
+        bool *visited = new bool[element_count]();
+
         for(int i = 0; i < rectangles_bytes; i += 4) {
-            int id = data[i] + data[i+1]*256 + data[i+2]*256*256;
+            int id = data[i]*255 + data[i+1]*255*256 + data[i+2]*255*256*256;
+
             if (id != MAX_SELECTION_ID && !visited[id]) {
                 visited[id] = true;
                 ids.push_back(id);
@@ -832,7 +895,7 @@ void Viewport::testGLSelect() {
     viewProjection.translate((viewport[2] - 2 * (x - viewport[0])) / select_width, (viewport[3] - 2 * (y - viewport[1])) / select_height, 0);
     viewProjection.scale(viewport[2] / select_width, viewport[3] / select_height, 1.0);
 
-    viewProjection *= camera.projection * camera.view.inverted();
+    viewProjection *= camera.viewProjection;
 
     //init selection buffer
     GLuint selectBuf[128]; //BUFSIZE 128

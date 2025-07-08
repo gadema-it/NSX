@@ -67,7 +67,7 @@ Transform3D& Transform3D::operator*=(const Transform3D &t)
 const Transform3D operator*(const Transform3D& t1, const Transform3D& t2)
 {
     Transform3D t;
-    t._translation = t1._translation + t2._translation;
+    t._translation = t1._translation + t1.rotation() * (t2._translation * t1._scale);
     t._rotation = t1._rotation * t2._rotation;
     t._scale = t1._scale * t2._scale;
     return t;

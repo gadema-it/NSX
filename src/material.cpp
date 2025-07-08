@@ -9,10 +9,10 @@ Material::Material()
 {
 
     shaderProgram = new QOpenGLShaderProgram();
-    //shaderProgram->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/position.vert");
-    //shaderProgram->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/only_color.frag");
-    shaderProgram->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/color_normal.vert");
-    shaderProgram->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/color_normal.frag");
+    shaderProgram->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/position.vert");
+    shaderProgram->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/only_color.frag");
+    //shaderProgram->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/color_normal.vert");
+    //shaderProgram->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/color_normal.frag");
     shaderProgram->link();
     shaderProgram->bind();
     u_modelViewProj = shaderProgram->uniformLocation("modelViewProj");

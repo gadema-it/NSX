@@ -23,7 +23,7 @@ class TransformTool: public Tool
 public:
     TransformTool();
 
-    enum mode {
+    enum TransformMode {
         TRANSLATION,
         ROTATION,
         SCALE
@@ -42,11 +42,15 @@ public:
         X_AXIS_SELECTED = 1,
         Y_AXIS_SELECTED = 2,
         Z_AXIS_SELECTED = 4,
+        CIRCLE_SELECTED = 8,
         ALL_AXIS_SELECTED = X_AXIS_SELECTED | Y_AXIS_SELECTED | Z_AXIS_SELECTED,
         XY_AXIS_SELECTED = X_AXIS_SELECTED | Y_AXIS_SELECTED,
         YZ_AXIS_SELECTED = Y_AXIS_SELECTED | Z_AXIS_SELECTED,
         ZX_AXIS_SELECTED = Z_AXIS_SELECTED | X_AXIS_SELECTED
     };
+
+
+    TransformMode transform_mode;
 
     QVector3D selectedColor;
 
@@ -58,14 +62,20 @@ public:
     QOpenGLBuffer indexBuffer;
     QOpenGLShaderProgram* shaderProgram;
 
+    QOpenGLBuffer rotate_vertex_buffer;
+
     int u_modelViewProj;
     int u_color;
     int u_point_size;
 
     boolean active = false;
-    boolean translating = false;
+
+    boolean translating = false; //TODO  -> dragging
+    boolean dragging = false;
+
     boolean isCursorOver = false;
     boolean has_selection = false;
+    boolean selecting = false;
 
     selection_flag componentSelected = NO_SELECTION;
     selection_flag hide = NO_SELECTION;
@@ -83,6 +93,11 @@ public:
 
     QVector3D local_translation;
 
+    QVector3D start_ball_rotation;
+    QVector2D ball_center;
+
+    QQuaternion start_rotation;
+
     Tool *selectTool;
 
     //TODO components
@@ -94,8 +109,8 @@ public:
     void updateSize(QMatrix4x4 cameraView);
 
 
-    void draw(QOpenGLFunctions *f, QVector3D cameraPosition, QMatrix4x4& viewProjection) override;
-    void drawSelection(QOpenGLFunctions *f, QVector3D cameraPosition, QMatrix4x4& viewProjection) override;
+    void draw(QOpenGLFunctions *f, Camera &camera) override;
+    void drawSelection(QOpenGLFunctions *f, Camera &camera) override;
 
     void activate() override;
     void deactivate() override;

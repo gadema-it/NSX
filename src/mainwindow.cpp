@@ -15,6 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    this->setWindowTitle("NSX 0.1");
     //ui->statusbar->hide();
 
     Application &application = Application::instance();
@@ -234,6 +235,12 @@ void MainWindow::loadModel()
 
     QTextStream in(&file);
     QString line = in.readLine();
+
+    qDebug() << "start read";
+
+   // vertex_position.reserve(2000);
+   // face_indices.reserve(2000);
+
     while (!line.isNull()) {
 
         QStringList line_array = line.split(' ');
@@ -258,6 +265,7 @@ void MainWindow::loadModel()
         line = in.readLine();
     }
 
+   qDebug() << "OK read";
 
   //  return;
 
@@ -266,18 +274,32 @@ void MainWindow::loadModel()
 
     m->geometry = new Geometry;
     m->geometry->fromVertexFaceArray(vertex_position, face_indices);
-    m->geometry->updateFaceNormals();
-    m->geometry->updateHalfEdgeNormals();
-    m->geometry->triangulate();
-  // m->geometry->fanTriangulate();
 
+   qDebug() << "OK faces";
+
+    m->geometry->updateFaceNormals();
+
+    qDebug() << "OK 112";
+
+    m->geometry->updateHalfEdgeNormals();
+
+    qDebug() << "OK 3333333";
+    m->geometry->triangulate();
     //m->geometry_dirty = true;
+    qDebug() << "OK geom";
 
     m->init();
 
     m->setMaterial(viewport->material);
     viewport->scene.addObject3D(m);
     viewport->scene.updateObjectList();
+
+    qDebug() << "OK import";
+
+//    Transform3D t;
+//    t.setTranslation(1,1,1);
+//    t.setRotation(QQuaternion::fromEulerAngles(-40,-405,-45)); //z x y
+//    m->setLocalTransform(t);
 }
 
 

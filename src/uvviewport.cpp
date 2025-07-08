@@ -18,7 +18,7 @@ UVViewport::UVViewport(QWidget *parent): QOpenGLWidget(parent)
 void UVViewport::initializeGL()
 {
 
-   // makeCurrent();
+    makeCurrent();
     initializeOpenGLFunctions();
 
     shaderProgram = new QOpenGLShaderProgram(this);
@@ -57,7 +57,7 @@ void UVViewport::paintGL()
     glEnable(GL_PROGRAM_POINT_SIZE);
     glDisable(GL_DEPTH_TEST);
 
-    std::vector<QVariant> selection = Application::instance().selection;
+    std::vector<QVariant> &selection = Application::instance().selection;
     //std::vector<QVariant> selection = Viewport::getActiveViewport()->selection;
     if (selection.empty()) return;
 
@@ -67,7 +67,7 @@ void UVViewport::paintGL()
   //  if (current_mesh == nullptr) return;
 
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    QMatrix4x4 viewProjection = camera->projection * camera->view.inverted();
+   // QMatrix4x4 viewProjection = camera->viewp;
 
    // current_mesh->draw(f, &viewProjection, this);
 
@@ -77,7 +77,7 @@ void UVViewport::paintGL()
 
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
-    glMultMatrixf(viewProjection.data());
+    glMultMatrixf(camera->viewProjection.data());
             glBegin(GL_TRIANGLES);
             glColor3f(1.0, 1.0, 1.0);
             glTexCoord2f(0, 0);
@@ -101,7 +101,7 @@ void UVViewport::paintGL()
  //Draw uv grid
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
-        glMultMatrixf(viewProjection.data());
+        glMultMatrixf(camera->viewProjection.data());
 
         glBegin(GL_LINES);
         glColor3f(0.0, 0.0, 0.0);
@@ -134,7 +134,7 @@ void UVViewport::paintGL()
 
 
    shaderProgram->bind();
-   shaderProgram->setUniformValue("modelViewProj", viewProjection);
+   shaderProgram->setUniformValue("modelViewProj", camera->viewProjection);
    shaderProgram->setUniformValue("color", QVector3D(0, 0, 1));
 
    current_mesh->uv_buffer.bind();
@@ -150,5 +150,5 @@ void UVViewport::paintGL()
   // vertex_buffer.release();
    shaderProgram->release();
 
-   qDebug() << glGetError();
+   //qDebug() << "UV gl errors" << glGetError();
 }

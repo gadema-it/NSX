@@ -329,6 +329,15 @@ void Mesh::updateVertexNormal() {
 // draw pick buffers
 void Mesh::drawSelection(QOpenGLFunctions *f, QMatrix4x4 *viewProjection, SelectionType selection_type, int id)
 {
+    if (geometry_dirty) { //TODO in update
+        geometry->updateFaceNormals();
+        geometry->triangulate();
+        geometry->updateHalfEdgeNormals();
+        updateTopology();
+        updateBuffers();
+        geometry_dirty = false;
+    }
+
     Viewport *viewport = Viewport::getActiveViewport();
     QOpenGLShaderProgram *selectShader = Viewport::getSelectShader();
     selectShader->bind();
@@ -349,31 +358,31 @@ void Mesh::drawSelection(QOpenGLFunctions *f, QMatrix4x4 *viewProjection, Select
     if (selection_type == OBJECT) {
         selectShader->setUniformValue("selection_mode", 0); // color
         selectShader->setUniformValue("color", QVector3D(id/255.0f, 0, 0));
-        f->glDrawElements(GL_TRIANGLES, triangles_index_buffer.size(), GL_UNSIGNED_SHORT, triangles_index_buffer.data()); //TODO oppure renderer->draw(material, mesh)? material->draw(mesh)
+        f->glDrawElements(GL_TRIANGLES, triangles_index_buffer.size(), GL_UNSIGNED_INT, triangles_index_buffer.data()); //TODO oppure renderer->draw(material, mesh)? material->draw(mesh)
     } else {
         //TODO if wireframe
         int offset_id = 0;
         selectShader->setUniformValue("selection_mode", 2); // primitive id
         if(selection_type & POLYGON) {
             selectShader->setUniformValue("start_index", offset_id);
-            f->glDrawElements(GL_TRIANGLES, triangles_index_buffer.size(), GL_UNSIGNED_SHORT, triangles_index_buffer.data());
+            f->glDrawElements(GL_TRIANGLES, triangles_index_buffer.size(), GL_UNSIGNED_INT, triangles_index_buffer.data());
             offset_id += triangle_count;
         } else { // if (selection_type & front) {
             selectShader->setUniformValue("selection_mode", 3); // clear
-            f->glDrawElements(GL_TRIANGLES, triangles_index_buffer.size(), GL_UNSIGNED_SHORT, triangles_index_buffer.data());
+            f->glDrawElements(GL_TRIANGLES, triangles_index_buffer.size(), GL_UNSIGNED_INT, triangles_index_buffer.data());
             selectShader->setUniformValue("selection_mode", 2); // primitive id
         }
 
 
         if (selection_type & VERTEX) {
             selectShader->setUniformValue("start_index", offset_id);
-            f->glDrawElements(GL_POINTS, geometry->vertices.size(), GL_UNSIGNED_SHORT, vertex_indices.data());
+            f->glDrawElements(GL_POINTS, geometry->vertices.size(), GL_UNSIGNED_INT, vertex_indices.data());
             offset_id += geometry->vertices.size();
         }
         if(selection_type & EDGE) {
             selectShader->setUniformValue("start_index", offset_id);
             glLineWidth(12.0f);
-            f->glDrawElements(GL_LINES, edge_indices.size(), GL_UNSIGNED_SHORT, edge_indices.data());
+            f->glDrawElements(GL_LINES, edge_indices.size(), GL_UNSIGNED_INT, edge_indices.data());
             glLineWidth(1.0f);
             //offset_id += edge_indices.size();
         }
@@ -413,10 +422,15 @@ void Mesh::draw(QOpenGLFunctions *f, QMatrix4x4 *viewProjection, Viewport *viewp
 
     global_transform = parent()->global_transform * local_transform;
 
+    QMatrix4x4 global = parent()->global_transform.toMatrix() * local_transform.toMatrix();
+
+
 // Setup shader --------------------------------------------------------------------------------TODO dynamic shader
     shaderProgram->bind();
     material->setModelViewProj(*viewProjection * global_transform.toMatrix());
     material->setModelInverseTranspose(global_transform.toMatrix().inverted().transposed());
+//    material->setModelViewProj(*viewProjection * global);
+//    material->setModelInverseTranspose(global.inverted().transposed());
     shaderProgram->setUniformValue("viewport_size", QPoint{viewport->width, viewport->height});
 
     triangleVertexBuffer.bind();
@@ -437,23 +451,23 @@ void Mesh::draw(QOpenGLFunctions *f, QMatrix4x4 *viewProjection, Viewport *viewp
 
             if (selected_component_array.size() > 0) {
                 material->setColor(QVector3D(0.9, 0, 0));
-                f->glDrawElements(GL_POINTS, selected_component_indices_array.size(), GL_UNSIGNED_SHORT, &selected_component_indices_array[0]);
+                f->glDrawElements(GL_POINTS, selected_component_indices_array.size(), GL_UNSIGNED_INT, &selected_component_indices_array[0]);
             }
 
             material->setColor(QVector3D(0, 0, 1));
-            f->glDrawElements(GL_POINTS, geometry->vertices.size(), GL_UNSIGNED_SHORT, vertex_indices.data());
+            f->glDrawElements(GL_POINTS, geometry->vertices.size(), GL_UNSIGNED_INT, vertex_indices.data());
 
         } else if (selection_type == EDGE) {
 
             if (selected_component_array.size() > 0) {
                 material->setColor(QVector3D(0.9, 0, 0));
-                f->glDrawElements(GL_LINES, selected_component_indices_array.size(), GL_UNSIGNED_SHORT, &selected_component_indices_array[0]);
+                f->glDrawElements(GL_LINES, selected_component_indices_array.size(), GL_UNSIGNED_INT, &selected_component_indices_array[0]);
             }
 
         } else if (selection_type == POLYGON && selected_component_array.size() > 0) {
             material->setColor(QVector3D(0.9, 0, 0));
             shaderProgram->setUniformValue("stripple", true);
-            f->glDrawElements(GL_TRIANGLES, selected_component_indices_array.size(), GL_UNSIGNED_SHORT, &selected_component_indices_array[0]);
+            f->glDrawElements(GL_TRIANGLES, selected_component_indices_array.size(), GL_UNSIGNED_INT, &selected_component_indices_array[0]);
             shaderProgram->setUniformValue("stripple", false);
         }
 
@@ -472,7 +486,7 @@ void Mesh::draw(QOpenGLFunctions *f, QMatrix4x4 *viewProjection, Viewport *viewp
         //glDisable(GL_LINE_STIPPLE);
         //glPopAttrib();
 
-        f->glDrawElements(GL_LINES, edge_indices.size(), GL_UNSIGNED_SHORT, edge_indices.data());         
+        f->glDrawElements(GL_LINES, edge_indices.size(), GL_UNSIGNED_INT, edge_indices.data());
         shaderProgram->setUniformValue("unlit", false);
     }
 
@@ -489,10 +503,10 @@ void Mesh::draw(QOpenGLFunctions *f, QMatrix4x4 *viewProjection, Viewport *viewp
         shaderProgram->setAttributeBuffer(0, GL_FLOAT, 0, 3, 24);
         shaderProgram->enableAttributeArray(1);
         shaderProgram->setAttributeBuffer(1, GL_FLOAT, 12, 3, 24);
-        f->glDrawElements(GL_TRIANGLES, geometry->subdivision_triangle_indices.size(), GL_UNSIGNED_SHORT, geometry->subdivision_triangle_indices.data());
+        f->glDrawElements(GL_TRIANGLES, geometry->subdivision_triangle_indices.size(), GL_UNSIGNED_INT, geometry->subdivision_triangle_indices.data());
         subdivision_vertex_buffer.release();
     } else {
-        glDrawElements(GL_TRIANGLES, triangles_index_buffer.size(), GL_UNSIGNED_SHORT, triangles_index_buffer.data());
+        glDrawElements(GL_TRIANGLES, triangles_index_buffer.size(), GL_UNSIGNED_INT, triangles_index_buffer.data());
         triangleVertexBuffer.release();
     }
 

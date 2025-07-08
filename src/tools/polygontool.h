@@ -6,6 +6,7 @@
 #include <QVector3D>
 
 class Face;
+class Mesh;
 
 class PolygonTool: Tool
 {
@@ -15,19 +16,21 @@ public:
     PolygonTool();
 
 
-    enum state {
+    enum State {
       NONE,
       NEW_POLYGON
     };
 
-
+    State state = NONE;
     std::vector<QVector3D> points;
     QVector3D new_point;
     Face *face;
+    Mesh *mesh;
+    int edge_id = -1;
 
     bool dragging;
 
-    void draw(QOpenGLFunctions *f, QVector3D cameraPosition, QMatrix4x4 &viewProjection);
+    void draw(QOpenGLFunctions *f, Camera &camera);
     void initialize();
     void activate();
     void deactivate();

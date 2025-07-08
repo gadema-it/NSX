@@ -27,5 +27,5 @@ void main()
 //    else
 //        fColor = vec4(gl_PrimitiveID/255.0f, 0, 0, 1);
 
-   fColor = vec4(color, 1);
+   fColor = vec4(1,1,1, 1);
 }

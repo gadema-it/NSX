@@ -33,7 +33,7 @@ public:
     void mouseReleaseEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
 
-    void draw(QOpenGLFunctions *f, QVector3D cameraPosition, QMatrix4x4 &viewProjection);
+    void draw(QOpenGLFunctions *f, Camera &camera);
 };
 
 

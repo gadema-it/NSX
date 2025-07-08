@@ -38,7 +38,7 @@ void main()
     } else if (selection_mode == 1) {
         fColor = vec4(vertex_id/255.0f, 0, 0, 0); // polygons
     } else if (selection_mode == 2) {
-        fColor = vec4(gl_PrimitiveID/255.0f, ((gl_PrimitiveID>>8)&0xFF)/255.0f, 0, 0); // vertex and lines
+        fColor = vec4((gl_PrimitiveID & 0xFF)/255.0f, ((gl_PrimitiveID >> 8) & 0xFF)/255.0f, ((gl_PrimitiveID >> 16) & 0xFF)/255.0f, 0);
     } else {
         fColor = vec4(255.0f, 255.0f, 255.0f, 0); // blank
     }

@@ -61,8 +61,7 @@ struct MemoryPool
     void addBucket() {
         T* bucket = static_cast<T*>(std::malloc(sizeof(T) * bucket_size));
         buckets.push_back(&bucket);
-        free_items.reserve(free_items.size() + bucket_size);
-        for (int i = bucket_size; i > 0; i--) {
+        for (int i = 0; i < bucket_size; i++) {
             free_items.push_back(bucket + i);
         }
     }

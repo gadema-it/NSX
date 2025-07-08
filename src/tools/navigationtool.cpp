@@ -28,10 +28,13 @@ void NavigationTool::mouseMoveEvent(QMouseEvent *event)
             //TODO per zoomToCursor serve salvare target in pressButton
             //TODO zoom quando cursore va verso il centro, da tenere conto del quadrante in cui si trova.
             QVector3D screen_point = QVector3D(event->pos().rx(), viewport->height - event->pos().ry() , 0.0f);
-            QVector3D camera_ray_start = screen_point.unproject(camera->view.inverted(), camera->projection, QRect(0, 0, viewport->width, viewport->height)); //camera near plane projection
+            QVector3D camera_ray_start = screen_point.unproject(camera->view, camera->projection, QRect(0, 0, viewport->width, viewport->height)); //camera near plane projection
 
-            QVector3D camera_ray = (camera->view.column(3).toVector3D() - camera_ray_start).normalized();
-            QVector3D cameraPlaneNormal = (camera->view.column(3).toVector3D() - camera->translation).normalized();
+            QVector3D camera_ray = (camera->transform.column(3).toVector3D() - camera_ray_start).normalized();
+            QVector3D cameraPlaneNormal = (camera->transform.column(3).toVector3D() - camera->translation).normalized();
+            qDebug() << "camera->transform" << camera->transform;
+            qDebug() << "camera_ray" << camera_ray;
+             qDebug() << "cameraPlaneNormal" << camera_ray;
 
             float distance = QVector3D::dotProduct(cameraPlaneNormal, (camera->translation - camera_ray_start)) / QVector3D::dotProduct(camera_ray, cameraPlaneNormal);
 

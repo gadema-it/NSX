@@ -38,10 +38,10 @@ void SelectionTool::keyPressEvent(QKeyEvent *event)
         } else if (event->key() == Qt::Key_E) {
             selection_type = EDGE;
             selection_mode = PICK;
-        } else if (event->key() == Qt::Key_Y) {
+        } else if (event->key() == Qt::Key_R) {
             selection_type = POLYGON;
             selection_mode = PICK;
-        }  else if (event->key() == Qt::Key_U) {
+        }  else if (event->key() == Qt::Key_Y) {
             selection_type = POLYGON;
             selection_mode = DRAG;
         }
@@ -119,7 +119,7 @@ void SelectionTool::mouseReleaseEvent(QMouseEvent *event)
             for(auto &id: ids) {
                 viewport->edit_mode_object->selectComponent(id);   
             }
-            qDebug() << "Selected ids" << viewport->edit_mode_object->selected_component_array;
+            qDebug() << "Selected ids" << viewport->edit_mode_object->selected_component_array.at(0);
 
             // TODO command setSelected(ids) addSelected
 
@@ -156,7 +156,7 @@ void SelectionTool::mouseMoveEvent(QMouseEvent *event)
 
 
 //TODO painter? buffer?
-void SelectionTool::draw(QOpenGLFunctions *f, QVector3D cameraPosition, QMatrix4x4 &viewProjection)
+void SelectionTool::draw(QOpenGLFunctions *f, Camera &camera)
 {
     Viewport* viewport = Viewport::getActiveViewport();
     if (!dragging) return;

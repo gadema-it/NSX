@@ -29,13 +29,13 @@ public:
     std::vector<std::vector<int>> polygons;
    // std::vector<QVector3D> polygon_normals;
 
-    std::vector<GLushort> vertex_indices; // map triangle vertex -> vertices
-    std::vector<GLushort> edge_indices;
-    std::vector<GLushort> edges_selection; //TEST
-    std::vector<GLushort> polygon_triangles_index; // polygon -> triangles :: index in triangles arrays corresponding to the first triangle of the polygon
-    std::vector<GLushort> triangles_polygon; // triangles -> polygon
-    std::vector<GLushort> triangles; // array of vertex indices
-    std::vector<GLushort> triangles_index_buffer; // array of vertex indices
+    std::vector<GLuint> vertex_indices; // map triangle vertex -> vertices
+    std::vector<GLuint> edge_indices;
+    std::vector<GLuint> edges_selection; //TEST
+    std::vector<GLuint> polygon_triangles_index; // polygon -> triangles :: index in triangles arrays corresponding to the first triangle of the polygon
+    std::vector<GLuint> triangles_polygon; // triangles -> polygon
+    std::vector<GLuint> triangles; // array of vertex indices
+    std::vector<GLuint> triangles_index_buffer; // array of vertex indices
   //  std::vector<GLushort> subdivision_triangles_index_buffer; // array of vertex indices
 
     //selections
@@ -45,8 +45,8 @@ public:
 
 
     //TODO enum selection type
-    std::vector<GLushort> selected_component_array;
-    std::vector<GLushort> selected_component_indices_array;
+    std::vector<GLuint> selected_component_array;
+    std::vector<GLuint> selected_component_indices_array;
 
     void updateTopology();
     void updateBuffers(); //updateVertexBuffer

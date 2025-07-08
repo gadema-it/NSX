@@ -94,15 +94,15 @@ void Application::init()
     hotkey_bindings[Qt::Key_E] = QVariant::fromValue(t);
     hotkey_bindings[Qt::Key_R] = QVariant::fromValue(t);
 
-    hotkey_bindings[Qt::Key_V] = QVariant::fromValue(new TransformTool);
-
-
-
 //set viewport
     mainWindow->viewport->default_tool = t;
     mainWindow->viewport->active_tool = t;
-//    activateTool(t);
-    //    w->show();
+
+    t = new TransformTool;
+    hotkey_bindings[Qt::Key_V] = QVariant::fromValue(t);
+    hotkey_bindings[Qt::Key_C] = QVariant::fromValue(t);
+    hotkey_bindings[Qt::Key_X] = QVariant::fromValue(t);
+
 }
 
 void Application::registerPlugin(QString filename)

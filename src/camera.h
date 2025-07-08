@@ -25,10 +25,11 @@ public:
 
     QMatrix4x4 projection;
     QMatrix4x4 view; //->transform
-    //QMatrix4x4 viewProjection; //TODO getViewProjectionMatrix(); if dirty viewProjection = projection * view.inverted(nullptr);
+    QMatrix4x4 viewProjection; //TODO getViewProjectionMatrix(); if dirty viewProjection = projection * view.inverted(nullptr);
 
     QVector3D translation;
     QQuaternion rotation;
+    QMatrix4x4 transform;
 
     //QVector3D pointOfInterest;  //lookat?
     float orbitDistance;
