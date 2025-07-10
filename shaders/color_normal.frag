@@ -1,6 +1,6 @@
 #version 330
 
-in int gl_PrimitiveID;
+// in int gl_PrimitiveID; ?
 in vec3 vNormal;
 in vec2 line_pos;
 in vec2 uv;
@@ -25,7 +25,7 @@ void main()
    } else {
        float diffusion = max(dot(normalize(vNormal), light), 0);
        fColor = vec4(diffusion * color, 1);
-       fColor = diffusion * texture(texture_sampler, uv);
+       //fColor = diffusion * texture(texture_sampler, uv);
    }
 
    if (stripple) {

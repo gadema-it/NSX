@@ -2,7 +2,7 @@
 
 
 
-in int gl_PrimitiveID ;
+//in int gl_PrimitiveID ;
 
 uniform vec3 color;
 uniform bool use_color;

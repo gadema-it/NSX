@@ -4,7 +4,7 @@ layout (binding = 0, r8)  uniform image1D select_image;
 
 //in int gl_PrimitiveID ;
 flat in float vertex_id;
-in int gl_PrimitiveID;
+//in int gl_PrimitiveID;
 
 out vec4 fColor;
 

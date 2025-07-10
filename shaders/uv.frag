@@ -1,6 +1,6 @@
 #version 330
 
-in int gl_PrimitiveID;
+//in int gl_PrimitiveID;
 uniform vec3 color;
 
 out vec4 fColor;
