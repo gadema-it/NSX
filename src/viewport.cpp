@@ -449,12 +449,12 @@ void Viewport::keyPressEvent(QKeyEvent *event)
                    camera.updateView();
                }
            }
-       } else if (event->key() == Qt::Key_Plus) {
+       } else if (event->key() == Qt::Key_PageUp) {
            if (!selection.empty()) {
                Mesh* m = qvariant_cast<Mesh*>(selection.at(0));
                if (m) m->increaseSubdivisionLevel();
            }
-       } else if (event->key() == Qt::Key_Minus) {
+       } else if (event->key() == Qt::Key_PageDown) {
            if (!selection.empty()) {
                Mesh* m = qvariant_cast<Mesh*>(selection.at(0));
                if(m) m->decreaseSubdivisionLevel();

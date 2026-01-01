@@ -102,10 +102,18 @@ RESOURCES += \
 
 
 win32 {
+
     LIBS += opengl32.lib
-    LIBS += $$PWD/3rdparty/OpenSubdiv/bin/opensubdiv/sdc/sdc_obj.dir/Debug/sdc_obj.lib
-    LIBS += $$PWD/3rdparty/OpenSubdiv/bin/opensubdiv/vtr/vtr_obj.dir/Debug/vtr_obj.lib
-    LIBS += $$PWD/3rdparty/OpenSubdiv/bin/opensubdiv/far/far_obj.dir/Debug/far_obj.lib
+
+    CONFIG( debug, debug|release ) {
+        LIBS += $$PWD/3rdparty/OpenSubdiv/build/opensubdiv/sdc/sdc_obj.dir/Debug/sdc_obj.lib
+        LIBS += $$PWD/3rdparty/OpenSubdiv/build/opensubdiv/vtr/vtr_obj.dir/Debug/vtr_obj.lib
+        LIBS += $$PWD/3rdparty/OpenSubdiv/build/opensubdiv/far/far_obj.dir/Debug/far_obj.lib
+    } else {
+        LIBS += $$PWD/3rdparty/OpenSubdiv/build/opensubdiv/sdc/sdc_obj.dir/Release/sdc_obj.lib
+        LIBS += $$PWD/3rdparty/OpenSubdiv/build/opensubdiv/vtr/vtr_obj.dir/Release/vtr_obj.lib
+        LIBS += $$PWD/3rdparty/OpenSubdiv/build/opensubdiv/far/far_obj.dir/Release/far_obj.lib
+    }
 }
 
 

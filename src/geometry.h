@@ -238,7 +238,7 @@ public:
     bool subdivision_cage;
     int subdivision_level = 0;
 
-    //std::vector<Vertex> vertex_stencils;
+    std::vector<Vertex> source_vertices;
     std::vector<Vertex> subdivision_vertices;
 
   //  std::vector<SubdivisionFace> subdivision_faces;
@@ -258,7 +258,5 @@ public:
         qDebug() << indices;
     }
 };
-
-
 
 #endif // GEOMETRY_H

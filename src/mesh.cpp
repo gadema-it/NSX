@@ -57,7 +57,6 @@ void Mesh::increaseSubdivisionLevel()
 
     geometry->subdivision_level++;
     geometry->createSubdivision();
-    geometry->updateSubdivision();
 
     if (!subdivision_vertex_buffer.isCreated()) subdivision_vertex_buffer.create();
     subdivision_vertex_buffer.bind();
@@ -72,9 +71,9 @@ void Mesh::increaseSubdivisionLevel()
 void Mesh::decreaseSubdivisionLevel()
 {
     if (geometry->subdivision_level < 1) return;
+
     geometry->subdivision_level--;
     geometry->createSubdivision();
-    geometry->updateSubdivision();
 
     if (!subdivision_vertex_buffer.isCreated()) subdivision_vertex_buffer.create();
     subdivision_vertex_buffer.bind();
@@ -285,10 +284,8 @@ void Mesh::updateBuffers() {
     normalBuffer.release();
 
 
-
     if (geometry->subdivision_level > 0) {
         geometry->updateSubdivision();
-
         subdivision_vertex_buffer.bind();
         int vertex_count = geometry->subdivision_vertices.size();
         verticesArray = (GLfloat*)subdivision_vertex_buffer.map(QOpenGLBuffer::WriteOnly);
@@ -301,7 +298,6 @@ void Mesh::updateBuffers() {
             *verticesArray = v->normal[0]; verticesArray++;
             *verticesArray = v->normal[1]; verticesArray++;
             *verticesArray = v->normal[2]; verticesArray++;
-
         }
         subdivision_vertex_buffer.unmap();
         subdivision_vertex_buffer.release();
@@ -503,7 +499,7 @@ void Mesh::draw(QOpenGLFunctions *f, QMatrix4x4 *viewProjection, Viewport *viewp
         shaderProgram->setAttributeBuffer(0, GL_FLOAT, 0, 3, 24);
         shaderProgram->enableAttributeArray(1);
         shaderProgram->setAttributeBuffer(1, GL_FLOAT, 12, 3, 24);
-        f->glDrawElements(GL_TRIANGLES, geometry->subdivision_triangle_indices.size(), GL_UNSIGNED_INT, geometry->subdivision_triangle_indices.data());
+        glDrawElements(GL_TRIANGLES, geometry->subdivision_triangle_indices.size(), GL_UNSIGNED_INT, geometry->subdivision_triangle_indices.data());
         subdivision_vertex_buffer.release();
     } else {
         glDrawElements(GL_TRIANGLES, triangles_index_buffer.size(), GL_UNSIGNED_INT, triangles_index_buffer.data());

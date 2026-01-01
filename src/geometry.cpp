@@ -11,13 +11,8 @@
 #include <far/stencilTableFactory.h>
 
 #include <far/primvarRefiner.h>
-#include <far/topologyDescriptor.h>
 
 #include <cmath>
-
-
-//using //namespace NSX;
-
 
 
 static void test_loop_star(HalfEdge *he, bool inverse) {
@@ -792,13 +787,10 @@ same_face:
 }
 
 
-
 void Geometry::addEdge(int index_v1, int index_v2)
 {
 
 }
-
-
 
 
 int Geometry::addVertexAndFace(std::vector<QVector3D> vertex_positions)
@@ -1101,6 +1093,8 @@ void Geometry::createSubdivision()
     int nstencils = stencil_table->GetNumStencils();
     subdivision_vertices.resize(nstencils);
 
+     source_vertices.resize(vertices.size());
+
 // save triangles
     Far::TopologyLevel const & refLastLevel = topology_refiner->GetLevel(subdivision_level);
     int nverts = refLastLevel.GetNumVertices();
@@ -1124,8 +1118,11 @@ void Geometry::updateSubdivision()
 {
    if (subdivision_level == 0) return;
 
-   // pos
-   stencil_table->UpdateValues(vertices[0], &subdivision_vertices[0]);
+   for (int i = 0; i < source_vertices.size(); i++) {
+       source_vertices[i] = *vertices[i];
+    }
+
+    stencil_table->UpdateValues(&source_vertices[0], &subdivision_vertices[0]);
 
    // normals
    Far::TopologyLevel const & refLastLevel = topology_refiner->GetLevel(subdivision_level);
