@@ -53,6 +53,7 @@ void Mesh::updateBBox()
 
 void Mesh::increaseSubdivisionLevel()
 {
+#ifdef WITH_OPENSUBDIV
     if (geometry->subdivision_level > 2) return;
 
     geometry->subdivision_level++;
@@ -66,10 +67,12 @@ void Mesh::increaseSubdivisionLevel()
     subdivision_vertex_buffer.release();
 
     updateBuffers();
+#endif
 }
 
 void Mesh::decreaseSubdivisionLevel()
 {
+#ifdef WITH_OPENSUBDIV
     if (geometry->subdivision_level < 1) return;
 
     geometry->subdivision_level--;
@@ -83,6 +86,7 @@ void Mesh::decreaseSubdivisionLevel()
     subdivision_vertex_buffer.release();
 
     updateBuffers();
+#endif
 }
 
 
@@ -283,7 +287,7 @@ void Mesh::updateBuffers() {
     normalBuffer.unmap();
     normalBuffer.release();
 
-
+#ifdef WITH_OPENSUBDIV
     if (geometry->subdivision_level > 0) {
         geometry->updateSubdivision();
         subdivision_vertex_buffer.bind();
@@ -302,6 +306,7 @@ void Mesh::updateBuffers() {
         subdivision_vertex_buffer.unmap();
         subdivision_vertex_buffer.release();
     }
+#endif
 
     edge_indices.clear();
     for (std::vector<HalfEdge*>::iterator it = geometry->half_edges.begin(); it != geometry->half_edges.end(); it += 2) {

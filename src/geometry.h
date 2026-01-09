@@ -8,8 +8,10 @@
 #include "memorypool.h"
 
 
+#ifdef WITH_OPENSUBDIV
 #include <far/stencilTable.h>
 #include <far/topologyRefiner.h>
+#endif
 
 struct HalfEdge;
 
@@ -218,8 +220,6 @@ public:
     void fanTriangulate();
     void triangulate();
 
-
-
     int splitEdge(int index, float ratio);
     int splitFace(int vertex_A, int vertex_B);
     void addEdge(int index_v1, int index_v2);
@@ -230,22 +230,21 @@ public:
 
 //--------- subdiv
 
-    //TopologyDescriptor* topology_descriptor;
+    int subdivision_level = 0;
+
+#ifdef WITH_OPENSUBDIV
     OpenSubdiv::Far::TopologyRefiner* topology_refiner = nullptr;
     const OpenSubdiv::Far::StencilTable* stencil_table = nullptr;
+    void createSubdivision();
+    void updateSubdivision();
+#endif
 
-    bool subdivision_active;
-    bool subdivision_cage;
-    int subdivision_level = 0;
+    //bool subdivision_active;
+    //bool subdivision_cage;
 
     std::vector<Vertex> source_vertices;
     std::vector<Vertex> subdivision_vertices;
-
-  //  std::vector<SubdivisionFace> subdivision_faces;
     std::vector<unsigned int> subdivision_triangle_indices;
-
-    void createSubdivision();
-    void updateSubdivision();
 
     void printFaceIndex(HalfEdge *he) {
         HalfEdge *loop_start = he;

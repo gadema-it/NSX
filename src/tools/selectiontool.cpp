@@ -119,7 +119,7 @@ void SelectionTool::mouseReleaseEvent(QMouseEvent *event)
             for(auto &id: ids) {
                 viewport->edit_mode_object->selectComponent(id);   
             }
-            qDebug() << "Selected ids" << viewport->edit_mode_object->selected_component_array.at(0);
+            //qDebug() << "Selected ids" << viewport->edit_mode_object->selected_component_array.at(0);
 
             // TODO command setSelected(ids) addSelected
 
@@ -132,7 +132,7 @@ void SelectionTool::mouseReleaseEvent(QMouseEvent *event)
                 selection.push_back(QVariant::fromValue(object3D));
             }
 
-            qDebug() << "Selected ids: " << ids;
+            //qDebug() << "Selected ids: " << ids;
         }
 
         //QString message = "Selected ids: " << ids.;

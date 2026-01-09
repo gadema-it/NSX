@@ -1,0 +1,3 @@
+[submodule "3rdparty/OpenSubdiv"]
+	path = 3rdparty/OpenSubdiv
+	url = https://github.com/PixarAnimationStudios/OpenSubdiv.git

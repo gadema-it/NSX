@@ -1,19 +1,17 @@
 #include "geometry.h"
 
+#include <cmath>
 #ifndef M_PI
     #define M_PI 3.14159265358979323846
 #endif
 
-
 #include <QDebug>
+
+#ifdef WITH_OPENSUBDIV
 #include <far/topologyDescriptor.h>
-
 #include <far/stencilTableFactory.h>
-
 #include <far/primvarRefiner.h>
-
-#include <cmath>
-
+#endif
 
 static void test_loop_star(HalfEdge *he, bool inverse) {
     HalfEdge *test_A = he;
@@ -1049,7 +1047,7 @@ void Geometry::deleteFace(std::vector<int> vertex_indices)
 
 
 //-------------------------------- subdivisions
-
+#ifdef WITH_OPENSUBDIV
 using namespace OpenSubdiv;
 
 void Geometry::createSubdivision()
@@ -1113,7 +1111,6 @@ void Geometry::createSubdivision()
 }
 
 
-
 void Geometry::updateSubdivision()
 {
    if (subdivision_level == 0) return;
@@ -1152,3 +1149,4 @@ void Geometry::updateSubdivision()
    }
 
 }
+#endif

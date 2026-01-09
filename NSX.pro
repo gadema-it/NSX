@@ -1,12 +1,11 @@
 QT += core gui widgets
 
 CONFIG += c++11
+#CONFIG+=WITH_OPENSUBDIV
 
 DEFINES += QT_DEPRECATED_WARNINGS
 
-INCLUDEPATH += $$PWD/3rdparty/OpenSubdiv/opensubdiv
 INCLUDEPATH += $$PWD/src
-
 
 HEADERS += \
     src/application.h \
@@ -90,9 +89,6 @@ SOURCES += \
 # ---
 
 
-
-
-
 FORMS += \
     src/mainwindow.ui
 	
@@ -105,14 +101,18 @@ win32 {
 
     LIBS += opengl32.lib
 
-    CONFIG( debug, debug|release ) {
-        LIBS += $$PWD/3rdparty/OpenSubdiv/build/opensubdiv/sdc/sdc_obj.dir/Debug/sdc_obj.lib
-        LIBS += $$PWD/3rdparty/OpenSubdiv/build/opensubdiv/vtr/vtr_obj.dir/Debug/vtr_obj.lib
-        LIBS += $$PWD/3rdparty/OpenSubdiv/build/opensubdiv/far/far_obj.dir/Debug/far_obj.lib
-    } else {
-        LIBS += $$PWD/3rdparty/OpenSubdiv/build/opensubdiv/sdc/sdc_obj.dir/Release/sdc_obj.lib
-        LIBS += $$PWD/3rdparty/OpenSubdiv/build/opensubdiv/vtr/vtr_obj.dir/Release/vtr_obj.lib
-        LIBS += $$PWD/3rdparty/OpenSubdiv/build/opensubdiv/far/far_obj.dir/Release/far_obj.lib
+    WITH_OPENSUBDIV  {
+        INCLUDEPATH += $$PWD/3rdparty/OpenSubdiv/opensubdiv
+        DEFINES += WITH_OPENSUBDIV
+        CONFIG( debug, debug|release ) {
+            LIBS += $$PWD/3rdparty/OpenSubdiv/build/opensubdiv/sdc/sdc_obj.dir/Debug/sdc_obj.lib
+            LIBS += $$PWD/3rdparty/OpenSubdiv/build/opensubdiv/vtr/vtr_obj.dir/Debug/vtr_obj.lib
+            LIBS += $$PWD/3rdparty/OpenSubdiv/build/opensubdiv/far/far_obj.dir/Debug/far_obj.lib
+        } else {
+            LIBS += $$PWD/3rdparty/OpenSubdiv/build/opensubdiv/sdc/sdc_obj.dir/Release/sdc_obj.lib
+            LIBS += $$PWD/3rdparty/OpenSubdiv/build/opensubdiv/vtr/vtr_obj.dir/Release/vtr_obj.lib
+            LIBS += $$PWD/3rdparty/OpenSubdiv/build/opensubdiv/far/far_obj.dir/Release/far_obj.lib
+        }
     }
 }
 
