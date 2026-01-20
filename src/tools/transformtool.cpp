@@ -287,6 +287,7 @@ void TransformTool::showGizmo()
 void TransformTool::startTranslation()
 {
     translating = true;
+    local_translation = QVector3D(0,0,0);
     //startTransform = currentTransform;
 }
 
@@ -301,10 +302,10 @@ void TransformTool::endTranslation()
 {
     translating = false;
 
-    if (!currentObjects.empty()) {
+    if (!currentObjects.empty() && local_translation.length() != 0) {  // restore inital position and apply translate command TODO keep position and save command
         // object mode
         for(int i = 0; i < currentObjects.size(); i ++) {
-            currentObjects[i]->local_transform.setTranslation(currentTransforms[i].translation());
+           currentObjects[i]->local_transform.setTranslation(currentTransforms[i].translation());
         }
 
         std::vector<QVariant> args;
@@ -718,13 +719,13 @@ void TransformTool::deactivate() {
 void TransformTool::keyPressEvent(QKeyEvent *event)
 {
     //get selections
-    if (event->key() == Qt::Key_V) {
+    if (event->key() == Qt::Key_W) {
         transform_mode = TRANSLATION;
-    } else if (event->key() == Qt::Key_C) {
+    } else if (event->key() == Qt::Key_E) {
         transform_mode = ROTATION;
-    } else if (event->key() == Qt::Key_X) {
+    } else if (event->key() == Qt::Key_R) {
         transform_mode = SCALE;
-    } else if (event->key() == Qt::Key_B) {
+    } else if (event->key() == Qt::Key_Q) {
         //transform_mode = TRANSLATION_TWEAK;
     }
 }
