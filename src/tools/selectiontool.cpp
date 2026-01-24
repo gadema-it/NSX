@@ -32,16 +32,16 @@ void SelectionTool::keyPressEvent(QKeyEvent *event)
             viewport->edit_mode_object = nullptr;
         }
     } else {
-        if (event->key() == Qt::Key_T) {
+        if (event->key() == Qt::Key_V) {
             selection_type = VERTEX;
             selection_mode = PICK;
-        } else if (event->key() == Qt::Key_E) {
+        } else if (event->key() == Qt::Key_C) {
             selection_type = EDGE;
             selection_mode = PICK;
-        } else if (event->key() == Qt::Key_R) {
+        } else if (event->key() == Qt::Key_X) {
             selection_type = POLYGON;
             selection_mode = PICK;
-        }  else if (event->key() == Qt::Key_Y) {
+        }  else if (event->key() == Qt::Key_Z) {
             selection_type = POLYGON;
             selection_mode = DRAG;
         }

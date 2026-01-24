@@ -92,8 +92,8 @@ MainWindow::MainWindow(QWidget *parent)
 
 //---------------------------------- modeling menu --------------------------------------------------------
 
-    QMenu *modelingMenu = menuBar()->addMenu(tr("&Modeling"));
-    modelingMenu->setObjectName("modeling");
+    QMenu *modelingMenu = menuBar()->addMenu(tr("&Model"));
+    modelingMenu->setObjectName("model");
 
     QMenu *modelingMenuCreateMesh = modelingMenu->addMenu(tr("&Create"));
 
@@ -109,7 +109,7 @@ MainWindow::MainWindow(QWidget *parent)
     modelingMenu->addSeparator();
 
 //animation menu
-    QMenu *animationMenu = menuBar()->addMenu(tr("&Animating"));
+    QMenu *animationMenu = menuBar()->addMenu(tr("&Animate"));
 
     QAction *add_locator_action = new QAction(tr("&Add locator"), this);
     connect(add_locator_action, &QAction::triggered,
@@ -119,7 +119,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 
 //shading menu
-    QMenu *renderMenu = menuBar()->addMenu(tr("&Shading"));
+    QMenu *renderMenu = menuBar()->addMenu(tr("&Shade"));
 
     //QDockWidget *wdg = new QDockWidget();
    // wdg->show();

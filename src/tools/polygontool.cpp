@@ -12,7 +12,7 @@ PolygonTool::PolygonTool()
 {
     Application &application = Application::instance();
     QAction *action = new QAction(application.tr("&PolygonTool"));
-    application.mainWindow->menuBar()->findChild<QMenu*>("modeling")->addAction(action);
+    application.mainWindow->menuBar()->findChild<QMenu*>("model")->addAction(action);
     connect(action, &QAction::triggered,
             this, [this](){Application::instance().activateTool(this);
     });

@@ -18,7 +18,7 @@ EdgeTool::EdgeTool()
 {
     Application &application = Application::instance();
     QAction *action = new QAction(application.tr("&EdgeTool"));
-    application.mainWindow->menuBar()->findChild<QMenu*>("modeling")->addAction(action);
+    application.mainWindow->menuBar()->findChild<QMenu*>("model")->addAction(action);
     connect(action, &QAction::triggered,
             this, [this](){Application::instance().activateTool(this);
     });
@@ -36,6 +36,8 @@ void EdgeTool::activate()
         Mesh* m = qvariant_cast<Mesh*>(app.selection.at(0));
         if (m) {
             mesh = m;
+            mesh->selection_type = VERTEX;
+            Viewport::getActiveViewport()->edit_mode_object = mesh;
         }
     }
 }

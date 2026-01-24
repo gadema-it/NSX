@@ -3,6 +3,7 @@
 
 #include <QVector3D>
 #include <QVector2D>
+#include <cmath>
 #include <vector>
 #include <qdebug.h>
 #include "memorypool.h"

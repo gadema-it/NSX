@@ -68,14 +68,14 @@ public:
     int u_color;
     int u_point_size;
 
-    boolean active = false;
+    bool active = false;
 
-    boolean translating = false; //TODO  -> dragging
-    boolean dragging = false;
+    bool translating = false; //TODO  -> dragging
+    bool dragging = false;
 
-    boolean isCursorOver = false;
-    boolean has_selection = false;
-    boolean selecting = false;
+    bool isCursorOver = false;
+    bool has_selection = false;
+    bool selecting = false;
 
     selection_flag componentSelected = NO_SELECTION;
     selection_flag hide = NO_SELECTION;

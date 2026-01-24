@@ -90,18 +90,18 @@ void Application::init()
 
     Tool* t = new SelectionTool;
     hotkey_bindings[Qt::Key_Space] = QVariant::fromValue(t);
-    hotkey_bindings[Qt::Key_T] = QVariant::fromValue(t);
-    hotkey_bindings[Qt::Key_E] = QVariant::fromValue(t);
-    hotkey_bindings[Qt::Key_R] = QVariant::fromValue(t);
+    hotkey_bindings[Qt::Key_V] = QVariant::fromValue(t);
+    hotkey_bindings[Qt::Key_C] = QVariant::fromValue(t);
+    hotkey_bindings[Qt::Key_X] = QVariant::fromValue(t);
 
 //set viewport
     mainWindow->viewport->default_tool = t;
     mainWindow->viewport->active_tool = t;
 
     t = new TransformTool;
-    hotkey_bindings[Qt::Key_V] = QVariant::fromValue(t);
-    hotkey_bindings[Qt::Key_C] = QVariant::fromValue(t);
-    hotkey_bindings[Qt::Key_X] = QVariant::fromValue(t);
+    hotkey_bindings[Qt::Key_W] = QVariant::fromValue(t);
+    hotkey_bindings[Qt::Key_E] = QVariant::fromValue(t);
+    hotkey_bindings[Qt::Key_R] = QVariant::fromValue(t);
 
 }
 
